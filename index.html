@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karaoke Speech Reader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .presenter-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 18px;
+            color: #ffeb3b;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: #4CAF50;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .karaoke-display {
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .current-line {
+            font-size: 48px;
+            line-height: 1.4;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .next-line {
+            font-size: 32px;
+            color: #666;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.5;
+        }
+
+        .word {
+            display: inline-block;
+            margin: 0 8px;
+            transition: all 0.3s ease;
+            padding: 2px 4px;
+        }
+
+        .word.past {
+            color: #4CAF50;
+            transform: scale(0.95);
+            opacity: 0.7;
+        }
+
+        .word.current {
+            color: #ffeb3b;
+            background: rgba(255, 235, 59, 0.2);
+            transform: scale(1.15);
+            font-weight: bold;
+            border-radius: 5px;
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        .word.upcoming {
+            color: #fff;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1.15); }
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0.8));
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: 2px solid #fff;
+            background: transparent;
+            color: #fff;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: #fff;
+            color: #000;
+            transform: scale(1.05);
+        }
+
+        .btn.primary {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+
+        .btn.primary:hover {
+            background: #45a049;
+            border-color: #45a049;
+            color: #fff;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 30px;
+        }
+
+        .speed-control label {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .speed-control input {
+            width: 120px;
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 120px;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #ffeb3b);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .section-indicator {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .current-line {
+                font-size: 32px;
+                min-height: 100px;
+            }
+            
+            .next-line {
+                font-size: 24px;
+                min-height: 80px;
+            }
+
+            .word {
+                margin: 0 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="presenter-indicator" id="presenter">Female Presenter</div>
+        <div class="timer" id="timer">00:00</div>
+        <div class="section-indicator" id="section">Opening</div>
+        
+        <div class="karaoke-display">
+            <div class="current-line" id="currentLine"></div>
+            <div class="next-line" id="nextLine"></div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="restart()">↺ Restart</button>
+        <button class="btn primary" onclick="togglePlay()" id="playBtn">▶ Start</button>
+        <button class="btn" onclick="skipSection()">Skip →</button>
+        <div class="speed-control">
+            <label for="speed">Speed:</label>
+            <input type="range" id="speed" min="50" max="200" value="100" onchange="updateSpeed()">
+            <span id="speedValue">100%</span>
+        </div>
+    </div>
+
+    <script>
+        const speechData = [
+            {
+                section: "Opening",
+                presenter: "Female Presenter",
+                lines: [
+                    "UNESCO Judges, imagine this:",
+                    "3.6 BILLION people don't have basic digital literacy skills.",
+                    "That's half of humanity vulnerable to misinformation",
+                    "that destroys lives, topples democracies,",
+                    "and costs our global economy $78 billion annually.",
+                    "Traditional fact-checking has failed.",
+                    "By the time we verify one false story,",
+                    "a thousand more have spread.",
+                    "We need something revolutionary.",
+                    "Something that doesn't just fight fake news",
+                    "but transforms how humanity learns to think critically.",
+                    "Enter TruthGuard—",
+                    "where we're turning digital literacy into a superpower",
+                    "that everyone can possess."
+                ]
+            },
+            {
+                section: "The Vision",
+                presenter: "Male Presenter",
+                lines: [
+                    "Hi UNESCO! I'm [Name],",
+                    "and we're building TruthGuard—",
+                    "not just another app,",
+                    "but a complete digital literacy ecosystem",
+                    "that transforms how humanity learns, thinks,",
+                    "and thrives in the information age.",
+                    "We're not here to tell people what's true or false.",
+                    "We're here to teach them HOW to think,",
+                    "HOW to evaluate,",
+                    "and HOW to turn those skills into real opportunities."
+                ]
+            },
+            {
+                section: "The Solution",
+                presenter: "Male Presenter",
+                lines: [
+                    "TruthGuard is five revolutionary platforms in one:",
+                    "A Digital Literacy Academy",
+                    "that makes learning as engaging as gaming.",
+                    "A Community Knowledge Network",
+                    "that preserves cultural wisdom.",
+                    "A Skills Marketplace",
+                    "that turns literacy into livelihoods.",
+                    "An Investigation Hub",
+                    "where users solve real-world challenges.",
+                    "And an Economic Engine that creates actual jobs."
+                ]
+            },
+            {
+                section: "How It Works",
+                presenter: "Male Presenter",
+                lines: [
+                    "Here's the magic:",
+                    "Sarah in Kenya opens TruthGuard.",
+                    "She starts with a fun mission—",
+                    "investigating a viral health claim affecting her village.",
+                    "As she learns to trace sources and verify information,",
+                    "she earns points and badges.",
+                    "But here's where it gets powerful—",
+                    "her new skills are blockchain-certified.",
+                    "Companies can see her verification accuracy,",
+                    "her specializations, her problem-solving ability.",
+                    "Within months, Sarah goes from student",
+                    "to earning money as a digital literacy trainer",
+                    "in her community."
+                ]
+            },
+            {
+                section: "Gamification",
+                presenter: "Male Presenter",
+                lines: [
+                    "Why will billions use TruthGuard?",
+                    "Because we've gamified learning!",
+                    "Daily missions based on real viral content.",
+                    "Team challenges where communities work together.",
+                    "Leaderboards that make you WANT to learn more.",
+                    "AI that turns wrong answers into hilarious learning moments—",
+                    "imagine getting rickrolled for falling for fake news!",
+                    "We're making critical thinking as addictive as TikTok,",
+                    "but every swipe makes you smarter AND richer."
+                ]
+            },
+            {
+                section: "Real Impact",
+                presenter: "Male Presenter",
+                lines: [
+                    "This isn't theory—it's happening NOW.",
+                    "In our pilot,",
+                    "87% of users improved their critical thinking scores.",
+                    "A grandmother in India",
+                    "became her village's digital literacy teacher.",
+                    "Students in Brazil stopped a health scam",
+                    "that could've killed thousands.",
+                    "Young people in Jordan",
+                    "are earning their first income by helping others learn.",
+                    "We're not just fighting misinformation—",
+                    "we're creating a generation of critical thinkers",
+                    "who become teachers, earners, and leaders."
+                ]
+            },
+            {
+                section: "UNESCO Alignment",
+                presenter: "Male Presenter",
+                lines: [
+                    "UNESCO, this aligns PERFECTLY with your mission:",
+                    "Education 2030?",
+                    "We're reaching billions with quality digital education.",
+                    "Cultural Diversity?",
+                    "56 languages, preserving indigenous knowledge.",
+                    "Youth Employment?",
+                    "Direct pathways from learning to earning.",
+                    "Gender Equality?",
+                    "50% female participation, safe spaces for women.",
+                    "Peace Building?",
+                    "Communities united by truth instead of divided by lies.",
+                    "We're not asking you to fund a platform.",
+                    "We're asking you to invest in humanity's digital future."
+                ]
+            },
+            {
+                section: "Scale & Urgency",
+                presenter: "Male Presenter",
+                lines: [
+                    "With UNESCO's support,",
+                    "in Year One we'll train 1 million digital citizens,",
+                    "create 10,000 jobs,",
+                    "and stop millions of false stories from destroying lives.",
+                    "By Year Five?",
+                    "50 million people empowered.",
+                    "Half a million jobs created.",
+                    "Entire nations transformed.",
+                    "But every day we wait, misinformation wins.",
+                    "Communities suffer.",
+                    "Youth lose opportunities.",
+                    "Democracy weakens."
+                ]
+            },
+            {
+                section: "Closing",
+                presenter: "Male Presenter",
+                lines: [
+                    "UNESCO Judges, you have a choice.",
+                    "Fund another fact-checking tool that nobody will use.",
+                    "Or fund a movement",
+                    "that transforms how humanity learns, thinks, and thrives.",
+                    "TruthGuard isn't just fighting fake news.",
+                    "We're building a world",
+                    "where every person has the skills to succeed in the digital age.",
+                    "Where truth isn't dictated—it's discovered.",
+                    "Where digital literacy doesn't just grant certificates—",
+                    "it changes lives.",
+                    "Join us.",
+                    "Let's build peace in the minds of men and women—",
+                    "one game, one skill, one opportunity at a time.",
+                    "TruthGuard. Where Knowledge Meets Opportunity.",
+                    "Thank you."
+                ]
+            }
+        ];
+
+        let currentSectionIndex = 0;
+        let currentLineIndex = 0;
+        let currentWordIndex = 0;
+        let isPlaying = false;
+        let playInterval;
+        let startTime;
+        let baseSpeed = 400; // milliseconds per word
+        let speedMultiplier = 1;
+
+        function getCurrentWords() {
+            const section = speechData[currentSectionIndex];
+            if (!section || currentLineIndex >= section.lines.length) return [];
+            return section.lines[currentLineIndex].split(' ');
+        }
+
+        function getNextLine() {
+            const section = speechData[currentSectionIndex];
+            if (!section) return '';
+            if (currentLineIndex + 1 < section.lines.length) {
+                return section.lines[currentLineIndex + 1];
+            } else if (currentSectionIndex + 1 < speechData.length) {
+                return speechData[currentSectionIndex + 1].lines[0];
+            }
+            return '';
+        }
+
+        function updateDisplay() {
+            const section = speechData[currentSectionIndex];
+            if (!section) return;
+
+            // Update section info
+            document.getElementById('presenter').textContent = section.presenter;
+            document.getElementById('section').textContent = section.section;
+
+            // Update current line with word highlighting
+            const words = getCurrentWords();
+            const currentLineDiv = document.getElementById('currentLine');
+            currentLineDiv.innerHTML = '';
+
+            words.forEach((word, index) => {
+                const span = document.createElement('span');
+                span.className = 'word';
+                span.textContent = word;
+                
+                if (index < currentWordIndex) {
+                    span.classList.add('past');
+                } else if (index === currentWordIndex) {
+                    span.classList.add('current');
+                } else {
+                    span.classList.add('upcoming');
+                }
+                
+                currentLineDiv.appendChild(span);
+            });
+
+            // Update next line
+            document.getElementById('nextLine').textContent = getNextLine();
+
+            // Update progress
+            const totalLines = speechData.reduce((sum, section) => sum + section.lines.length, 0);
+            const currentLine = speechData.slice(0, currentSectionIndex).reduce((sum, section) => sum + section.lines.length, 0) + currentLineIndex;
+            const progress = (currentLine / totalLines) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function advance() {
+            const words = getCurrentWords();
+            
+            if (currentWordIndex < words.length - 1) {
+                currentWordIndex++;
+            } else {
+                // Move to next line
+                currentWordIndex = 0;
+                currentLineIndex++;
+                
+                // Check if we need to move to next section
+                if (currentLineIndex >= speechData[currentSectionIndex].lines.length) {
+                    currentLineIndex = 0;
+                    currentSectionIndex++;
+                    
+                    if (currentSectionIndex >= speechData.length) {
+                        // End of speech
+                        pause();
+                        currentSectionIndex = speechData.length - 1;
+                        currentLineIndex = speechData[currentSectionIndex].lines.length - 1;
+                        document.getElementById('playBtn').textContent = '✓ Complete';
+                        return;
+                    }
+                }
+            }
+            
+            updateDisplay();
+        }
+
+        function play() {
+            if (!isPlaying) {
+                isPlaying = true;
+                document.getElementById('playBtn').textContent = '❚❚ Pause';
+                startTime = Date.now();
+                
+                playInterval = setInterval(() => {
+                    advance();
+                }, baseSpeed / speedMultiplier);
+                
+                // Timer update
+                setInterval(() => {
+                    if (isPlaying) {
+                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        const minutes = Math.floor(elapsed / 60);
+                        const seconds = elapsed % 60;
+                        document.getElementById('timer').textContent = 
+                            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    }
+                }, 1000);
+            }
+        }
+
+        function pause() {
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = '▶ Resume';
+            clearInterval(playInterval);
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                pause();
+            } else {
+                play();
+            }
+        }
+
+        function restart() {
+            pause();
+            currentSectionIndex = 0;
+            currentLineIndex = 0;
+            currentWordIndex = 0;
+            document.getElementById('timer').textContent = '00:00';
+            document.getElementById('playBtn').textContent = '▶ Start';
+            updateDisplay();
+        }
+
+        function skipSection() {
+            if (currentSectionIndex < speechData.length - 1) {
+                currentSectionIndex++;
+                currentLineIndex = 0;
+                currentWordIndex = 0;
+                updateDisplay();
+            }
+        }
+
+        function updateSpeed() {
+            const speed = document.getElementById('speed').value;
+            speedMultiplier = speed / 100;
+            document.getElementById('speedValue').textContent = speed + '%';
+            
+            if (isPlaying) {
+                pause();
+                play();
+            }
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlay();
+            } else if (e.code === 'ArrowRight') {
+                skipSection();
+            } else if (e.code === 'KeyR') {
+                restart();
+            }
+        });
+
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>
