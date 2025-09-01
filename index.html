@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Karaoke Speech Reader</title>
+    <title>TruthGuard 3-Minute Pitch - Karaoke Reader</title>
     <style>
         * {
             margin: 0;
@@ -202,6 +202,14 @@
             letter-spacing: 1px;
         }
 
+        .word-count {
+            position: absolute;
+            bottom: 130px;
+            left: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
         @media (max-width: 768px) {
             .current-line {
                 font-size: 32px;
@@ -224,6 +232,7 @@
         <div class="presenter-indicator" id="presenter">Female Presenter</div>
         <div class="timer" id="timer">00:00</div>
         <div class="section-indicator" id="section">Opening</div>
+        <div class="word-count" id="wordCount">Words: 0/450</div>
         
         <div class="karaoke-display">
             <div class="current-line" id="currentLine"></div>
@@ -247,126 +256,105 @@
     </div>
 
     <script>
+        // 3-minute pitch (450-480 words for 150-160 wpm delivery)
         const speechData = [
             {
-                section: "Opening",
+                section: "The Problem",
                 presenter: "Female Presenter",
                 lines: [
                     "UNESCO Judges, imagine this:",
-                    "3.6 BILLION people don't have basic digital literacy skills.",
-                    "That's half of humanity vulnerable to misinformation",
+                    "3.6 billion people—half of humanity—",
+                    "lack basic digital literacy skills.",
+                    "They're vulnerable to misinformation",
                     "that destroys lives, topples democracies,",
                     "and costs our global economy $78 billion annually.",
                     "Traditional fact-checking has failed.",
                     "By the time we verify one false story,",
                     "a thousand more have spread.",
-                    "We need something revolutionary.",
-                    "Something that doesn't just fight fake news",
-                    "but transforms how humanity learns to think critically.",
-                    "Enter TruthGuard—",
-                    "where we're turning digital literacy into a superpower",
-                    "that everyone can possess."
-                ]
-            },
-            {
-                section: "The Vision",
-                presenter: "Male Presenter",
-                lines: [
-                    "Hi UNESCO! I'm [Name],",
-                    "and we're building TruthGuard—",
-                    "not just another app,",
-                    "but a complete digital literacy ecosystem",
-                    "that transforms how humanity learns, thinks,",
-                    "and thrives in the information age.",
-                    "We're not here to tell people what's true or false.",
-                    "We're here to teach them HOW to think,",
-                    "HOW to evaluate,",
-                    "and HOW to turn those skills into real opportunities."
+                    "We need something revolutionary—",
+                    "something that transforms how humanity learns to think."
                 ]
             },
             {
                 section: "The Solution",
                 presenter: "Male Presenter",
                 lines: [
-                    "TruthGuard is five revolutionary platforms in one:",
-                    "A Digital Literacy Academy",
-                    "that makes learning as engaging as gaming.",
-                    "A Community Knowledge Network",
-                    "that preserves cultural wisdom.",
-                    "A Skills Marketplace",
-                    "that turns literacy into livelihoods.",
-                    "An Investigation Hub",
-                    "where users solve real-world challenges.",
-                    "And an Economic Engine that creates actual jobs."
+                    "I'm [Name], and we're building TruthGuard—",
+                    "not just another app,",
+                    "but a complete digital literacy ecosystem",
+                    "that transforms how billions learn, think, and thrive.",
+                    "We don't tell people what's true or false.",
+                    "We teach them HOW to think critically,",
+                    "HOW to evaluate information,",
+                    "and HOW to turn those skills into real economic opportunities."
                 ]
             },
             {
                 section: "How It Works",
                 presenter: "Male Presenter",
                 lines: [
-                    "Here's the magic:",
+                    "TruthGuard combines five revolutionary platforms:",
+                    "First, a Digital Literacy Academy",
+                    "that makes learning as addictive as gaming.",
+                    "Second, a Community Knowledge Network",
+                    "preserving local and cultural wisdom.",
+                    "Third, a Skills Marketplace",
+                    "connecting certified skills to real jobs.",
+                    "Fourth, an Investigation Hub",
+                    "where users solve real-world misinformation challenges.",
+                    "Fifth, an Economic Engine creating sustainable employment.",
+                    "Here's the magic in action:",
                     "Sarah in Kenya opens TruthGuard.",
-                    "She starts with a fun mission—",
-                    "investigating a viral health claim affecting her village.",
-                    "As she learns to trace sources and verify information,",
-                    "she earns points and badges.",
-                    "But here's where it gets powerful—",
-                    "her new skills are blockchain-certified.",
+                    "She starts investigating a viral health claim",
+                    "that's affecting her village.",
+                    "As she learns to trace sources and verify facts,",
+                    "she earns blockchain-certified badges.",
                     "Companies can see her verification accuracy,",
-                    "her specializations, her problem-solving ability.",
-                    "Within months, Sarah goes from student",
-                    "to earning money as a digital literacy trainer",
-                    "in her community."
+                    "her specializations, her problem-solving skills.",
+                    "Within months, Sarah transforms from student",
+                    "to earning income as a digital literacy trainer",
+                    "in her own community."
                 ]
             },
             {
-                section: "Gamification",
+                section: "Gamification & Impact",
                 presenter: "Male Presenter",
                 lines: [
                     "Why will billions use TruthGuard?",
-                    "Because we've gamified learning!",
+                    "Because we've gamified critical thinking!",
                     "Daily missions based on real viral content.",
-                    "Team challenges where communities work together.",
-                    "Leaderboards that make you WANT to learn more.",
-                    "AI that turns wrong answers into hilarious learning moments—",
-                    "imagine getting rickrolled for falling for fake news!",
-                    "We're making critical thinking as addictive as TikTok,",
-                    "but every swipe makes you smarter AND richer."
-                ]
-            },
-            {
-                section: "Real Impact",
-                presenter: "Male Presenter",
-                lines: [
+                    "Team challenges where communities unite.",
+                    "Leaderboards that make learning competitive.",
+                    "AI that turns mistakes into teaching moments.",
+                    "We're making fact-checking as addictive as TikTok,",
+                    "but every swipe makes you smarter AND richer.",
                     "This isn't theory—it's happening NOW.",
-                    "In our pilot,",
+                    "In our pilot program:",
                     "87% of users improved their critical thinking scores.",
-                    "A grandmother in India",
-                    "became her village's digital literacy teacher.",
+                    "A grandmother in India became her village's digital teacher.",
                     "Students in Brazil stopped a health scam",
-                    "that could've killed thousands.",
-                    "Young people in Jordan",
-                    "are earning their first income by helping others learn.",
-                    "We're not just fighting misinformation—",
-                    "we're creating a generation of critical thinkers",
-                    "who become teachers, earners, and leaders."
+                    "that could have killed thousands.",
+                    "Young people in Jordan are earning",
+                    "their first income by teaching others.",
+                    "We're creating a generation of critical thinkers",
+                    "who become teachers, earners, and community leaders."
                 ]
             },
             {
                 section: "UNESCO Alignment",
                 presenter: "Male Presenter",
                 lines: [
-                    "UNESCO, this aligns PERFECTLY with your mission:",
-                    "Education 2030?",
-                    "We're reaching billions with quality digital education.",
-                    "Cultural Diversity?",
-                    "56 languages, preserving indigenous knowledge.",
-                    "Youth Employment?",
-                    "Direct pathways from learning to earning.",
-                    "Gender Equality?",
-                    "50% female participation, safe spaces for women.",
-                    "Peace Building?",
-                    "Communities united by truth instead of divided by lies.",
+                    "This aligns PERFECTLY with UNESCO's mission:",
+                    "Education 2030? We're reaching billions",
+                    "with quality digital education.",
+                    "Cultural Diversity? 56 languages,",
+                    "preserving indigenous knowledge.",
+                    "Youth Employment? Direct pathways",
+                    "from learning to earning.",
+                    "Gender Equality? 50% female participation,",
+                    "with safe spaces for women.",
+                    "Peace Building? Communities united by truth",
+                    "instead of divided by lies.",
                     "We're not asking you to fund a platform.",
                     "We're asking you to invest in humanity's digital future."
                 ]
@@ -375,36 +363,35 @@
                 section: "Scale & Urgency",
                 presenter: "Male Presenter",
                 lines: [
-                    "With UNESCO's support,",
-                    "in Year One we'll train 1 million digital citizens,",
-                    "create 10,000 jobs,",
-                    "and stop millions of false stories from destroying lives.",
-                    "By Year Five?",
-                    "50 million people empowered.",
-                    "Half a million jobs created.",
-                    "Entire nations transformed.",
-                    "But every day we wait, misinformation wins.",
+                    "With UNESCO's support, here's what we'll achieve:",
+                    "Year One: 1 million digital citizens trained,",
+                    "10,000 jobs created,",
+                    "millions of false stories stopped.",
+                    "Year Five: 50 million people empowered,",
+                    "half a million sustainable jobs,",
+                    "entire nations transformed.",
+                    "But every day we wait,",
+                    "misinformation wins.",
                     "Communities suffer.",
-                    "Youth lose opportunities.",
                     "Democracy weakens."
                 ]
             },
             {
-                section: "Closing",
-                presenter: "Male Presenter",
+                section: "Call to Action",
+                presenter: "Female Presenter",
                 lines: [
                     "UNESCO Judges, you have a choice.",
                     "Fund another fact-checking tool that nobody will use.",
                     "Or fund a movement",
                     "that transforms how humanity learns, thinks, and thrives.",
                     "TruthGuard isn't just fighting fake news.",
-                    "We're building a world",
-                    "where every person has the skills to succeed in the digital age.",
+                    "We're building a world where every person",
+                    "has the skills to succeed in the digital age.",
                     "Where truth isn't dictated—it's discovered.",
                     "Where digital literacy doesn't just grant certificates—",
                     "it changes lives.",
                     "Join us.",
-                    "Let's build peace in the minds of men and women—",
+                    "Let's build peace in the minds of men and women,",
                     "one game, one skill, one opportunity at a time.",
                     "TruthGuard. Where Knowledge Meets Opportunity.",
                     "Thank you."
@@ -418,8 +405,33 @@
         let isPlaying = false;
         let playInterval;
         let startTime;
-        let baseSpeed = 400; // milliseconds per word
+        let timerInterval;
+        let baseSpeed = 375; // milliseconds per word (160 words per minute for 3-minute delivery)
         let speedMultiplier = 1;
+
+        function countTotalWords() {
+            let total = 0;
+            speechData.forEach(section => {
+                section.lines.forEach(line => {
+                    total += line.split(' ').length;
+                });
+            });
+            return total;
+        }
+
+        function countCurrentWords() {
+            let count = 0;
+            for (let s = 0; s < currentSectionIndex; s++) {
+                speechData[s].lines.forEach(line => {
+                    count += line.split(' ').length;
+                });
+            }
+            for (let l = 0; l < currentLineIndex; l++) {
+                count += speechData[currentSectionIndex].lines[l].split(' ').length;
+            }
+            count += currentWordIndex;
+            return count;
+        }
 
         function getCurrentWords() {
             const section = speechData[currentSectionIndex];
@@ -445,6 +457,11 @@
             // Update section info
             document.getElementById('presenter').textContent = section.presenter;
             document.getElementById('section').textContent = section.section;
+
+            // Update word count
+            const totalWords = countTotalWords();
+            const currentWords = countCurrentWords();
+            document.getElementById('wordCount').textContent = `Words: ${currentWords}/${totalWords}`;
 
             // Update current line with word highlighting
             const words = getCurrentWords();
@@ -510,22 +527,24 @@
             if (!isPlaying) {
                 isPlaying = true;
                 document.getElementById('playBtn').textContent = '❚❚ Pause';
-                startTime = Date.now();
+                if (!startTime) startTime = Date.now();
                 
                 playInterval = setInterval(() => {
                     advance();
                 }, baseSpeed / speedMultiplier);
                 
                 // Timer update
-                setInterval(() => {
-                    if (isPlaying) {
-                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                        const minutes = Math.floor(elapsed / 60);
-                        const seconds = elapsed % 60;
-                        document.getElementById('timer').textContent = 
-                            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                    }
-                }, 1000);
+                if (!timerInterval) {
+                    timerInterval = setInterval(() => {
+                        if (isPlaying && startTime) {
+                            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                            const minutes = Math.floor(elapsed / 60);
+                            const seconds = elapsed % 60;
+                            document.getElementById('timer').textContent = 
+                                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                        }
+                    }, 1000);
+                }
             }
         }
 
@@ -548,6 +567,7 @@
             currentSectionIndex = 0;
             currentLineIndex = 0;
             currentWordIndex = 0;
+            startTime = null;
             document.getElementById('timer').textContent = '00:00';
             document.getElementById('playBtn').textContent = '▶ Start';
             updateDisplay();
@@ -587,6 +607,9 @@
 
         // Initialize
         updateDisplay();
+        const totalWords = countTotalWords();
+        console.log(`Total words: ${totalWords}`);
+        console.log(`Estimated time at 160 wpm: ${(totalWords / 160).toFixed(1)} minutes`);
     </script>
 </body>
 </html>
